@@ -16,7 +16,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="local:CollapseBox">
                     <Border Background="{TemplateBinding Background}">
-                        <Grid>
+                        <Grid Margin="10,0,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CollapsedHeight}"/>
                                 <ColumnDefinition Width="10"/>
@@ -38,10 +38,24 @@
                                 </Path>
                             </Border>
                             <ContentPresenter Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" RecognizesAccessKey="True"/>
-                            <ContentControl x:Name="PART_CollapsedContent" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right" Content="{TemplateBinding CollapsedContent}"/>
-                            <ContentControl x:Name="PART_ExpandedContent" Grid.Column="2" Grid.Row="1" Content="{TemplateBinding ExpandedContent}" DockPanel.Dock="Top"/>
+                            <ContentControl x:Name="PART_CollapsedContent" Grid.Column="2" Grid.Row="0" Content="{TemplateBinding CollapsedContent}"/>
+                            <ContentControl x:Name="PART_ExpandedContent" Grid.Column="2" Grid.Row="1" Content="{TemplateBinding ExpandedContent}"/>
                         </Grid>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ExpandOverContent" Value="True">
+                            <Trigger.Setters>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.Row" Value="0"/>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.RowSpan" Value="2"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="ExpandOverContent" Value="False">
+                            <Trigger.Setters>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.Row" Value="1"/>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.RowSpan" Value="1"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

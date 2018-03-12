@@ -58,6 +58,12 @@ namespace WpfCollapseBox
             }
         }
 
+        public bool ExpandOverContent
+        {
+            get { return (bool)GetValue(ExpandOverContentProperty); }
+            set { SetValue(ExpandOverContentProperty, value); }
+        }
+
         public static readonly DependencyProperty CollapsedContentProperty =
             DependencyProperty.Register(nameof(CollapsedContent), typeof(object), typeof(CollapseBox), new FrameworkPropertyMetadata(null));
 
@@ -75,6 +81,9 @@ namespace WpfCollapseBox
 
         public static readonly DependencyProperty ExpandedHeightProperty =
             DependencyProperty.Register(nameof(ExpandedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(100d));
+
+        public static readonly DependencyProperty ExpandOverContentProperty =
+            DependencyProperty.Register(nameof(ExpandOverContent), typeof(bool), typeof(CollapseBox), new PropertyMetadata(false));
 
         RotateTransform _pathTransform;
         ContentControl _collapsedContent;
