@@ -1,7 +1,7 @@
-﻿<Application x:Class="WpfCollapseBox.App"
+﻿<Application x:Class="WpfCollapseBoxDemo.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:WpfCollapseBox"
+             xmlns:local="clr-namespace:WpfCollapseBoxDemo"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WpfCollapseBox.Properties
+namespace WpfCollapseBoxDemo.Properties
 {
 
 
