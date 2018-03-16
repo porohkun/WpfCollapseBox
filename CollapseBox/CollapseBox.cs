@@ -36,6 +36,12 @@ namespace WpfCollapseBox
             set { SetValue(TickThicknessProperty, value); }
         }
 
+        public double TickSize
+        {
+            get { return (double)GetValue(TickSizeProperty); }
+            set { SetValue(TickSizeProperty, value); }
+        }
+
         public double CollapsedHeight
         {
             get { return (double)GetValue(CollapsedHeightProperty); }
@@ -77,7 +83,10 @@ namespace WpfCollapseBox
             DependencyProperty.Register(nameof(TickThickness), typeof(double), typeof(CollapseBox), new PropertyMetadata(1d));
 
         public static readonly DependencyProperty CollapsedHeightProperty =
-            DependencyProperty.Register(nameof(CollapsedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(20d));
+            DependencyProperty.Register(nameof(CollapsedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(20d, TickSizePropertyChanged));
+
+        public static readonly DependencyProperty TickSizeProperty =
+            DependencyProperty.Register(nameof(TickSize), typeof(double), typeof(CollapseBox), new PropertyMetadata(0d, TickSizePropertyChanged));
 
         public static readonly DependencyProperty ExpandedHeightProperty =
             DependencyProperty.Register(nameof(ExpandedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(100d));
@@ -93,7 +102,22 @@ namespace WpfCollapseBox
         {
 
         }
-        
+
+        private static void TickSizePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is CollapseBox)
+                (d as CollapseBox).TickSizeChanged(e);
+        }
+
+        private void TickSizeChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (TickSize <= 0d)
+                if (CollapsedHeight > 10d)
+                    TickSize = CollapsedHeight - 8d;
+                else
+                    TickSize = CollapsedHeight;
+        }
+
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -106,7 +130,7 @@ namespace WpfCollapseBox
         protected override void OnChecked(RoutedEventArgs e)
         {
             base.OnChecked(e);
-            
+
             var pathAnim = new DoubleAnimation(-90, new Duration(ExpandTime));
             var heightAnim = new DoubleAnimation(ExpandedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
@@ -124,7 +148,7 @@ namespace WpfCollapseBox
         protected override void OnUnchecked(RoutedEventArgs e)
         {
             base.OnUnchecked(e);
-            
+
             var pathAnim = new DoubleAnimation(90, new Duration(ExpandTime));
             var heightAnim = new DoubleAnimation(CollapsedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>

@@ -29,17 +29,18 @@
                             <Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Bottom" Height="{TemplateBinding CollapsedHeight}" Width="{TemplateBinding CollapsedHeight}">
                                 <Path Style="{StaticResource RightTick}"
                                       Stroke="{TemplateBinding Foreground}"
-                                      Height="{TemplateBinding CollapsedHeight}"
-                                      Width="{TemplateBinding CollapsedHeight}"
-                                      StrokeThickness="{TemplateBinding TickThickness}">
+                                      Height="{TemplateBinding TickSize}"
+                                      Width="{TemplateBinding TickSize}"
+                                      StrokeThickness="{TemplateBinding TickThickness}"
+                                      VerticalAlignment="Center">
                                     <Path.RenderTransform>
                                         <RotateTransform x:Name="PART_PathTransform" Angle="90"/>
                                     </Path.RenderTransform>
                                 </Path>
                             </Border>
-                            <ContentPresenter Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" RecognizesAccessKey="True"/>
                             <ContentControl x:Name="PART_CollapsedContent" Grid.Column="2" Grid.Row="0" Content="{TemplateBinding CollapsedContent}"/>
                             <ContentControl x:Name="PART_ExpandedContent" Grid.Column="2" Grid.Row="1" Content="{TemplateBinding ExpandedContent}"/>
+                            <ContentPresenter Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" RecognizesAccessKey="True"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
