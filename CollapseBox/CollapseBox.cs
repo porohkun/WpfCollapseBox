@@ -42,6 +42,12 @@ namespace WpfCollapseBox
             set { SetValue(TickSizeProperty, value); }
         }
 
+        public VerticalAlignment TickVerticalAlignment
+        {
+            get { return (VerticalAlignment)GetValue(TickVerticalAlignmentProperty); }
+            set { SetValue(TickVerticalAlignmentProperty, value); }
+        }
+
         public double CollapsedHeight
         {
             get { return (double)GetValue(CollapsedHeightProperty); }
@@ -83,13 +89,16 @@ namespace WpfCollapseBox
             DependencyProperty.Register(nameof(TickThickness), typeof(double), typeof(CollapseBox), new PropertyMetadata(1d));
 
         public static readonly DependencyProperty CollapsedHeightProperty =
-            DependencyProperty.Register(nameof(CollapsedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(20d, TickSizePropertyChanged));
+            DependencyProperty.Register(nameof(CollapsedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(20d, PropertyChanged));
 
         public static readonly DependencyProperty TickSizeProperty =
-            DependencyProperty.Register(nameof(TickSize), typeof(double), typeof(CollapseBox), new PropertyMetadata(0d, TickSizePropertyChanged));
+            DependencyProperty.Register(nameof(TickSize), typeof(double), typeof(CollapseBox), new PropertyMetadata(0d, PropertyChanged));
+
+        public static readonly DependencyProperty TickVerticalAlignmentProperty =
+            DependencyProperty.Register(nameof(TickVerticalAlignment), typeof(VerticalAlignment), typeof(CollapseBox), new PropertyMetadata(VerticalAlignment.Bottom));
 
         public static readonly DependencyProperty ExpandedHeightProperty =
-            DependencyProperty.Register(nameof(ExpandedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(100d));
+            DependencyProperty.Register(nameof(ExpandedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(100d, PropertyChanged));
 
         public static readonly DependencyProperty ExpandOverContentProperty =
             DependencyProperty.Register(nameof(ExpandOverContent), typeof(bool), typeof(CollapseBox), new PropertyMetadata(false));
@@ -103,10 +112,15 @@ namespace WpfCollapseBox
 
         }
 
-        private static void TickSizePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is CollapseBox)
-                (d as CollapseBox).TickSizeChanged(e);
+            {
+                if (e.Property == TickVerticalAlignmentProperty || e.Property== CollapsedHeightProperty)
+                    (d as CollapseBox).TickSizeChanged(e);
+                else if (e.Property == ExpandedHeightProperty)
+                    (d as CollapseBox).ExpandedHeightChanged(e);
+            }
         }
 
         private void TickSizeChanged(DependencyPropertyChangedEventArgs e)
@@ -118,6 +132,12 @@ namespace WpfCollapseBox
                     TickSize = CollapsedHeight;
         }
 
+        private void ExpandedHeightChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (IsChecked.Value)
+                Height = ExpandedHeight;
+        }
+
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -125,6 +145,13 @@ namespace WpfCollapseBox
             _pathTransform = GetTemplateChild("PART_PathTransform") as RotateTransform;
             _collapsedContent = GetTemplateChild("PART_CollapsedContent") as ContentControl;
             _expandedContent = GetTemplateChild("PART_ExpandedContent") as ContentControl;
+            Height = IsChecked.Value ? ExpandedHeight : CollapsedHeight;
+            if (_pathTransform != null)
+                _pathTransform.Angle = IsChecked.Value ? -90 : 90;
+            if (_collapsedContent != null)
+                _collapsedContent.Visibility = IsChecked.Value ? Visibility.Collapsed : Visibility.Visible;
+            if (_expandedContent != null)
+                _expandedContent.Visibility = IsChecked.Value ? Visibility.Visible : Visibility.Collapsed;
         }
 
         protected override void OnChecked(RoutedEventArgs e)
@@ -135,14 +162,20 @@ namespace WpfCollapseBox
             var heightAnim = new DoubleAnimation(ExpandedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
-                _collapsedContent.Visibility = Visibility.Collapsed;
-                _expandedContent.Visibility = Visibility.Visible;
+                if (_collapsedContent != null)
+                    _collapsedContent.Visibility = Visibility.Collapsed;
+                if (_expandedContent != null)
+                    _expandedContent.Visibility = Visibility.Visible;
             };
-            _collapsedContent.Visibility = Visibility.Collapsed;
-            _expandedContent.Visibility = Visibility.Collapsed;
+            if (_collapsedContent != null)
+                _collapsedContent.Visibility = Visibility.Collapsed;
+            if (_expandedContent != null)
+                _expandedContent.Visibility = Visibility.Collapsed;
 
-            _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
-            BeginAnimation(HeightProperty, heightAnim);
+            if (_pathTransform != null)
+                _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
+            if (Template != null)
+                BeginAnimation(HeightProperty, heightAnim);
         }
 
         protected override void OnUnchecked(RoutedEventArgs e)
@@ -153,15 +186,20 @@ namespace WpfCollapseBox
             var heightAnim = new DoubleAnimation(CollapsedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
-                _collapsedContent.Visibility = Visibility.Visible;
-                _expandedContent.Visibility = Visibility.Collapsed;
+                if (_collapsedContent != null)
+                    _collapsedContent.Visibility = Visibility.Visible;
+                if (_expandedContent != null)
+                    _expandedContent.Visibility = Visibility.Collapsed;
             };
-            _collapsedContent.Visibility = Visibility.Collapsed;
-            _expandedContent.Visibility = Visibility.Collapsed;
+            if (_collapsedContent != null)
+                _collapsedContent.Visibility = Visibility.Collapsed;
+            if (_expandedContent != null)
+                _expandedContent.Visibility = Visibility.Collapsed;
 
-            _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
-            BeginAnimation(HeightProperty, heightAnim);
-
+            if (_pathTransform != null)
+                _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
+            if (Template != null)
+                BeginAnimation(HeightProperty, heightAnim);
         }
     }
 }

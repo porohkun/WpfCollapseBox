@@ -12,10 +12,11 @@
         <Setter Property="SnapsToDevicePixels" Value="true"/>
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="Background" Value="White"/>
+        <Setter Property="Height" Value="20"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:CollapseBox">
-                    <Border Background="{TemplateBinding Background}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                         <Grid Margin="10,0,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CollapsedHeight}"/>
@@ -26,7 +27,7 @@
                                 <RowDefinition Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CollapsedHeight}"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Bottom" Height="{TemplateBinding CollapsedHeight}" Width="{TemplateBinding CollapsedHeight}">
+                            <Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="{TemplateBinding TickVerticalAlignment}" Height="{TemplateBinding CollapsedHeight}" Width="{TemplateBinding CollapsedHeight}">
                                 <Path Style="{StaticResource RightTick}"
                                       Stroke="{TemplateBinding Foreground}"
                                       Height="{TemplateBinding TickSize}"
