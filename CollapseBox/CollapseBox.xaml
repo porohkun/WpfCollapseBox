@@ -8,7 +8,8 @@
         <Setter Property="Stretch" Value="Uniform"/>
         <Setter Property="Data" Value="M 6.0,23.5 17.5,12.0 6.0,0.5"/>
     </Style>
-    <Style TargetType="local:CollapseBox">
+    
+    <Style TargetType="local:CollapseBox" x:Key="CollapseBoxBaseStyle">
         <Setter Property="SnapsToDevicePixels" Value="true"/>
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="Background" Value="White"/>
@@ -62,4 +63,6 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="local:CollapseBox" BasedOn="{StaticResource CollapseBoxBaseStyle}"/>
 </ResourceDictionary>
