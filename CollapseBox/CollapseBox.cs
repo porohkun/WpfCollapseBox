@@ -42,6 +42,12 @@ namespace WpfCollapseBox
             set { SetValue(TickSizeProperty, value); }
         }
 
+        public bool RevertTick
+        {
+            get { return (bool)GetValue(RevertTickProperty); }
+            set { SetValue(RevertTickProperty, value); }
+        }
+
         public VerticalAlignment TickVerticalAlignment
         {
             get { return (VerticalAlignment)GetValue(TickVerticalAlignmentProperty); }
@@ -92,7 +98,10 @@ namespace WpfCollapseBox
             DependencyProperty.Register(nameof(CollapsedHeight), typeof(double), typeof(CollapseBox), new PropertyMetadata(20d, PropertyChanged));
 
         public static readonly DependencyProperty TickSizeProperty =
-            DependencyProperty.Register(nameof(TickSize), typeof(double), typeof(CollapseBox), new PropertyMetadata(0d, PropertyChanged));
+            DependencyProperty.Register(nameof(TickSize), typeof(double), typeof(CollapseBox), new PropertyMetadata(12d, PropertyChanged));
+
+        public static readonly DependencyProperty RevertTickProperty =
+            DependencyProperty.Register(nameof(RevertTick), typeof(bool), typeof(CollapseBox), new PropertyMetadata(false, PropertyChanged));
 
         public static readonly DependencyProperty TickVerticalAlignmentProperty =
             DependencyProperty.Register(nameof(TickVerticalAlignment), typeof(VerticalAlignment), typeof(CollapseBox), new PropertyMetadata(VerticalAlignment.Bottom));
@@ -116,22 +125,11 @@ namespace WpfCollapseBox
         {
             if (d is CollapseBox)
             {
-                if (e.Property == TickVerticalAlignmentProperty || e.Property== CollapsedHeightProperty)
-                    (d as CollapseBox).TickSizeChanged(e);
-                else if (e.Property == ExpandedHeightProperty)
+                if (e.Property == ExpandedHeightProperty)
                     (d as CollapseBox).ExpandedHeightChanged(e);
             }
         }
-
-        private void TickSizeChanged(DependencyPropertyChangedEventArgs e)
-        {
-            if (TickSize <= 0d)
-                if (CollapsedHeight > 10d)
-                    TickSize = CollapsedHeight - 8d;
-                else
-                    TickSize = CollapsedHeight;
-        }
-
+        
         private void ExpandedHeightChanged(DependencyPropertyChangedEventArgs e)
         {
             if (IsChecked.Value)
@@ -147,7 +145,7 @@ namespace WpfCollapseBox
             _expandedContent = GetTemplateChild("PART_ExpandedContent") as ContentControl;
             Height = IsChecked.Value ? ExpandedHeight : CollapsedHeight;
             if (_pathTransform != null)
-                _pathTransform.Angle = IsChecked.Value ? -90 : 90;
+                _pathTransform.Angle = (IsChecked.Value ? -90 : 90) * (RevertTick ? -1 : 1);
             if (_collapsedContent != null)
                 _collapsedContent.Visibility = IsChecked.Value ? Visibility.Collapsed : Visibility.Visible;
             if (_expandedContent != null)
@@ -158,7 +156,7 @@ namespace WpfCollapseBox
         {
             base.OnChecked(e);
 
-            var pathAnim = new DoubleAnimation(-90, new Duration(ExpandTime));
+            var pathAnim = new DoubleAnimation(-90 * (RevertTick ? -1 : 1), new Duration(ExpandTime));
             var heightAnim = new DoubleAnimation(ExpandedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
@@ -182,7 +180,7 @@ namespace WpfCollapseBox
         {
             base.OnUnchecked(e);
 
-            var pathAnim = new DoubleAnimation(90, new Duration(ExpandTime));
+            var pathAnim = new DoubleAnimation(90 * (RevertTick ? -1 : 1), new Duration(ExpandTime));
             var heightAnim = new DoubleAnimation(CollapsedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
