@@ -6,19 +6,90 @@
         xmlns:local="clr-namespace:WpfCollapseBoxDemo"
         xmlns:cb="clr-namespace:WpfCollapseBox"
         mc:Ignorable="d"
+        d:DataContext="{StaticResource VM}"
+        DataContext="{StaticResource VM}"
+        Background="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}"
         Title="MainWindow" Height="350" Width="525">
     <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="CollapseBox.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+        <local:DoubleSumConverter x:Key="DoubleSumConverter"/>
     </Window.Resources>
-    <DockPanel Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-        <cb:CollapseBox Height="100" DockPanel.Dock="Top" VerticalAlignment="Top"
-                         CollapsedHeight="20" ExpandedHeight="200"
-                         Content="blablabla" CollapsedContent=" collapsed " ExpandedContent="expanded"
-                         Margin="10">
+    <DockPanel Margin="10">
+        <cb:CollapseBox DockPanel.Dock="Top" VerticalAlignment="Top"
+                        Height="100"
+                        CollapsedHeight="{Binding CollapsedHeight}"
+                        Content="                             blablabla"
+                        CollapsedContent=" collapsed "
+                        
+                        IsChecked="{Binding IsChecked}"
+                        BorderThickness="1"
+                        BorderBrush="Gray"
+                        >
+            <cb:CollapseBox.ExpandedHeight>
+                <MultiBinding Converter="{StaticResource DoubleSumConverter}">
+                    <Binding Path="ExpandedContent.ActualHeight" />
+                    <Binding Path="CollapsedHeight"/>
+                </MultiBinding>
+            </cb:CollapseBox.ExpandedHeight>
+            <cb:CollapseBox.ExpandedContent>
+                <Border x:Name="ExpandedContent" Height="{Binding ExpandedHeight}" BorderThickness="1" BorderBrush="Gray">
+                    <TextBlock Text="expanded"/>
+                </Border>
+            </cb:CollapseBox.ExpandedContent>
+            <cb:CollapseBox.Template>
+                <ControlTemplate TargetType="cb:CollapseBox">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid Margin="10,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CollapsedHeight}"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CollapsedHeight}"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="{TemplateBinding TickVerticalAlignment}" Height="{TemplateBinding CollapsedHeight}" Width="{TemplateBinding CollapsedHeight}">
+                                <Path Style="{StaticResource RightTick}"
+                                      Stroke="{TemplateBinding Foreground}"
+                                      Height="{TemplateBinding TickSize}"
+                                      Width="{TemplateBinding TickSize}"
+                                      StrokeThickness="{TemplateBinding TickThickness}"
+                                      VerticalAlignment="Center">
+                                    <Path.RenderTransform>
+                                        <RotateTransform x:Name="PART_PathTransform" Angle="90"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </Border>
+                            <ContentControl x:Name="PART_CollapsedContent" Grid.Column="2" Grid.Row="0" Content="{TemplateBinding CollapsedContent}"/>
+                            <ContentControl x:Name="PART_ExpandedContent" Grid.Column="2" Grid.Row="1" Content="{TemplateBinding ExpandedContent}"/>
+                            <ContentPresenter Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" RecognizesAccessKey="True"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ExpandOverContent" Value="True">
+                            <Trigger.Setters>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.Row" Value="0"/>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.RowSpan" Value="2"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="ExpandOverContent" Value="False">
+                            <Trigger.Setters>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.Row" Value="1"/>
+                                <Setter TargetName="PART_ExpandedContent" Property="Grid.RowSpan" Value="1"/>
+                            </Trigger.Setters>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </cb:CollapseBox.Template>
         </cb:CollapseBox>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+            <TextBlock Text="Expanded height "/>
+            <TextBox Text="{Binding ExpandedHeight}" MinWidth="100"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+            <TextBlock Text="Collapsed height "/>
+            <TextBox Text="{Binding CollapsedHeight}" MinWidth="100"/>
+        </StackPanel>
+        <Grid DockPanel.Dock="Bottom"/>
     </DockPanel>
 </Window>

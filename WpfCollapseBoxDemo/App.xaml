@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:WpfCollapseBoxDemo"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CollapseBox.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <local:MainWindowViewModel x:Key="VM"/>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -118,7 +118,7 @@ namespace WpfCollapseBox
 
         public CollapseBox() : base()
         {
-
+            SetContentsVisibility(IsChecked.HasValue ? IsChecked.Value : false);
         }
 
         private static void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -129,7 +129,7 @@ namespace WpfCollapseBox
                     (d as CollapseBox).ExpandedHeightChanged(e);
             }
         }
-        
+
         private void ExpandedHeightChanged(DependencyPropertyChangedEventArgs e)
         {
             if (IsChecked.Value)
@@ -143,13 +143,7 @@ namespace WpfCollapseBox
             _pathTransform = GetTemplateChild("PART_PathTransform") as RotateTransform;
             _collapsedContent = GetTemplateChild("PART_CollapsedContent") as ContentControl;
             _expandedContent = GetTemplateChild("PART_ExpandedContent") as ContentControl;
-            Height = IsChecked.Value ? ExpandedHeight : CollapsedHeight;
-            if (_pathTransform != null)
-                _pathTransform.Angle = (IsChecked.Value ? -90 : 90) * (RevertTick ? -1 : 1);
-            if (_collapsedContent != null)
-                _collapsedContent.Visibility = IsChecked.Value ? Visibility.Collapsed : Visibility.Visible;
-            if (_expandedContent != null)
-                _expandedContent.Visibility = IsChecked.Value ? Visibility.Visible : Visibility.Collapsed;
+            SetContentsVisibility(IsChecked.HasValue ? IsChecked.Value : false);
         }
 
         protected override void OnChecked(RoutedEventArgs e)
@@ -160,10 +154,7 @@ namespace WpfCollapseBox
             var heightAnim = new DoubleAnimation(ExpandedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
-                if (_collapsedContent != null)
-                    _collapsedContent.Visibility = Visibility.Collapsed;
-                if (_expandedContent != null)
-                    _expandedContent.Visibility = Visibility.Visible;
+                SetContentsVisibility(true);
             };
             if (_collapsedContent != null)
                 _collapsedContent.Visibility = Visibility.Collapsed;
@@ -184,10 +175,7 @@ namespace WpfCollapseBox
             var heightAnim = new DoubleAnimation(CollapsedHeight, new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
-                if (_collapsedContent != null)
-                    _collapsedContent.Visibility = Visibility.Visible;
-                if (_expandedContent != null)
-                    _expandedContent.Visibility = Visibility.Collapsed;
+                SetContentsVisibility(false);
             };
             if (_collapsedContent != null)
                 _collapsedContent.Visibility = Visibility.Collapsed;
@@ -198,6 +186,17 @@ namespace WpfCollapseBox
                 _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
             if (Template != null)
                 BeginAnimation(HeightProperty, heightAnim);
+        }
+
+        protected void SetContentsVisibility(bool expand)
+        {
+            Height = expand ? ExpandedHeight : CollapsedHeight;
+            if (_pathTransform != null)
+                _pathTransform.Angle = (expand ? -90 : 90) * (RevertTick ? -1 : 1);
+            if (_collapsedContent != null)
+                _collapsedContent.Visibility = expand ? Visibility.Collapsed : Visibility.Visible;
+            if (_expandedContent != null)
+                _expandedContent.Visibility = expand ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }
