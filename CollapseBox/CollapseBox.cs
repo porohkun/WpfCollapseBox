@@ -118,7 +118,7 @@ namespace WpfCollapseBox
 
         public CollapseBox() : base()
         {
-            SetContentsVisibility(IsChecked.HasValue ? IsChecked.Value : false);
+            ShowContents();
         }
 
         private static void PropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -127,13 +127,19 @@ namespace WpfCollapseBox
             {
                 if (e.Property == ExpandedHeightProperty)
                     (d as CollapseBox).ExpandedHeightChanged(e);
+                if (e.Property == CollapsedHeightProperty)
+                    (d as CollapseBox).CollapsedHeightChanged(e);
             }
         }
 
         private void ExpandedHeightChanged(DependencyPropertyChangedEventArgs e)
         {
-            if (IsChecked.Value)
-                Height = ExpandedHeight;
+            AnimateChecked(IsChecked.Value, true);
+        }
+
+        private void CollapsedHeightChanged(DependencyPropertyChangedEventArgs e)
+        {
+            AnimateChecked(IsChecked.Value, true);
         }
 
         public override void OnApplyTemplate()
@@ -143,39 +149,30 @@ namespace WpfCollapseBox
             _pathTransform = GetTemplateChild("PART_PathTransform") as RotateTransform;
             _collapsedContent = GetTemplateChild("PART_CollapsedContent") as ContentControl;
             _expandedContent = GetTemplateChild("PART_ExpandedContent") as ContentControl;
-            SetContentsVisibility(IsChecked.HasValue ? IsChecked.Value : false);
+            ShowContents();
         }
 
         protected override void OnChecked(RoutedEventArgs e)
         {
             base.OnChecked(e);
 
-            var pathAnim = new DoubleAnimation(-90 * (RevertTick ? -1 : 1), new Duration(ExpandTime));
-            var heightAnim = new DoubleAnimation(ExpandedHeight, new Duration(ExpandTime));
-            heightAnim.Completed += (sender, ea) =>
-            {
-                SetContentsVisibility(true);
-            };
-            if (_collapsedContent != null)
-                _collapsedContent.Visibility = Visibility.Collapsed;
-            if (_expandedContent != null)
-                _expandedContent.Visibility = Visibility.Collapsed;
-
-            if (_pathTransform != null)
-                _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
-            if (Template != null)
-                BeginAnimation(HeightProperty, heightAnim);
+            AnimateChecked(true);
         }
 
         protected override void OnUnchecked(RoutedEventArgs e)
         {
             base.OnUnchecked(e);
 
-            var pathAnim = new DoubleAnimation(90 * (RevertTick ? -1 : 1), new Duration(ExpandTime));
-            var heightAnim = new DoubleAnimation(CollapsedHeight, new Duration(ExpandTime));
+            AnimateChecked(false);
+        }
+
+        private void AnimateChecked(bool expand, bool instant = false)
+        {
+            var pathAnim = new DoubleAnimation((expand ? -90 : 90) * (RevertTick ? -1 : 1), instant ? new Duration(TimeSpan.Zero) : new Duration(ExpandTime));
+            var heightAnim = new DoubleAnimation(expand ? GetActualExpandedHeight() : CollapsedHeight, instant ? new Duration(TimeSpan.Zero) : new Duration(ExpandTime));
             heightAnim.Completed += (sender, ea) =>
             {
-                SetContentsVisibility(false);
+                ShowContents();
             };
             if (_collapsedContent != null)
                 _collapsedContent.Visibility = Visibility.Collapsed;
@@ -186,17 +183,25 @@ namespace WpfCollapseBox
                 _pathTransform.BeginAnimation(RotateTransform.AngleProperty, pathAnim);
             if (Template != null)
                 BeginAnimation(HeightProperty, heightAnim);
+            if (instant)
+                ShowContents();
         }
 
-        protected void SetContentsVisibility(bool expand)
+        private void ShowContents()
         {
-            Height = expand ? ExpandedHeight : CollapsedHeight;
+            bool expand = IsChecked.Value;
             if (_pathTransform != null)
                 _pathTransform.Angle = (expand ? -90 : 90) * (RevertTick ? -1 : 1);
             if (_collapsedContent != null)
                 _collapsedContent.Visibility = expand ? Visibility.Collapsed : Visibility.Visible;
             if (_expandedContent != null)
                 _expandedContent.Visibility = expand ? Visibility.Visible : Visibility.Collapsed;
+            Height = expand ? GetActualExpandedHeight() : CollapsedHeight;
+        }
+
+        private double GetActualExpandedHeight()
+        {
+            return ExpandOverContent ? ExpandedHeight : (ExpandedHeight + CollapsedHeight);
         }
     }
 }
